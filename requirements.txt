@@ -1,0 +1,1 @@
+# Koristi isključivo Python standardnu biblioteku (zero dependencies!)

@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="sr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kućni Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              DEFAULT: '#0A0A0C',
+              subtle: '#121215',
+              card: '#16171B',
+              border: '#23252B',
+              active: '#2A2C35',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0A0A0C;
+      color: #E4E4E7;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .check-custom {
+      appearance: none;
+      width: 19px;
+      height: 19px;
+      border: 1.5px solid #3F3F46;
+      border-radius: 5px;
+      background: #141418;
+      cursor: pointer;
+      display: inline-grid;
+      place-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .check-custom:checked {
+      background: #10B981;
+      border-color: #10B981;
+    }
+    .check-custom:checked::after {
+      content: '';
+      width: 5px;
+      height: 9px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-zinc-700 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-surface-border bg-surface/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-3xl mx-auto px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-200">
+          KH
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-xs font-semibold tracking-tight text-zinc-100">Kućni Hub</h1>
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          </div>
+          <p id="header-date" class="text-[11px] text-zinc-400 font-medium">Učitavanje...</p>
+        </div>
+      </div>
+
+      <!-- Quick Notification Toggle & User Switcher -->
+      <div class="flex items-center space-x-2">
+        <button id="header-notif-btn" onclick="toggleNotifications()" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors bg-surface-subtle border-surface-border text-zinc-300 hover:text-white">
+          <span id="header-notif-icon">🔔</span>
+          <span id="header-notif-text" class="hidden sm:inline">Do 22h</span>
+        </button>
+
+        <div class="flex items-center bg-surface-subtle p-0.5 rounded-lg border border-surface-border text-xs">
+          <button id="user-btn-milos" onclick="switchUser('milos')" class="px-3 py-1 rounded-md font-medium transition-all bg-zinc-800 text-zinc-100 shadow-sm">
+            Miloš
+          </button>
+          <button id="user-btn-sestra" onclick="switchUser('sestra')" class="px-3 py-1 rounded-md font-medium transition-all text-zinc-400 hover:text-zinc-200">
+            Sestra
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 4G/5G LIVE ACCESS BANNER -->
+  <div class="bg-surface-subtle border-b border-surface-border">
+    <div class="max-w-3xl mx-auto px-4 py-1.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
+      <div class="flex items-center space-x-2 text-zinc-400">
+        <span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">4G / 5G Live</span>
+        <span class="truncate text-zinc-300 font-mono text-[11px]" id="public-url-display">Učitavanje...</span>
+      </div>
+      <button onclick="copyPublicUrl()" class="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-medium border border-zinc-700 transition-colors self-start sm:self-auto">
+        Kopiraj link
+      </button>
+    </div>
+  </div>
+
+  <!-- NAVIGATION TABS -->
+  <div class="max-w-3xl mx-auto px-4 w-full mt-3">
+    <div class="flex border-b border-surface-border">
+      <button onclick="setActiveTab('tasks')" id="tab-btn-tasks" class="px-4 py-2 text-xs font-semibold border-b-2 border-emerald-500 text-zinc-100 transition-all">
+        Čišćenje & Rutina
+      </button>
+      <button onclick="setActiveTab('shopping')" id="tab-btn-shopping" class="px-4 py-2 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-all flex items-center space-x-1.5">
+        <span>Nabavka</span>
+        <span id="urgent-badge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-400 font-mono hidden">0 hitno</span>
+        <span id="shopping-badge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-zinc-800 text-zinc-300 font-mono hidden">0</span>
+      </button>
+      <button onclick="setActiveTab('telegram')" id="tab-btn-telegram" class="px-4 py-2 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-all flex items-center space-x-1.5">
+        <span>Telegram</span>
+        <span id="tg-connected-dot" class="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+      </button>
+      <button onclick="setActiveTab('activity')" id="tab-btn-activity" class="px-4 py-2 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-all">
+        <span>Istorija</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-3xl mx-auto px-4 w-full mt-4 flex-1 pb-16">
+
+    <!-- ==================== TAB 1: ČIŠĆENJE & RUTINA ==================== -->
+    <section id="tab-tasks" class="space-y-3.5">
+
+      <!-- Overall Day Summary Bar -->
+      <div class="p-3.5 rounded-lg bg-surface-card border border-surface-border flex items-center justify-between">
+        <div>
+          <span class="text-[10px] uppercase tracking-wider font-semibold text-zinc-400" id="today-day-label">Danas</span>
+          <div id="today-focus-text" class="text-xs font-medium text-zinc-200 mt-0.5">Učitavanje...</div>
+        </div>
+        <div class="text-right">
+          <div id="overall-progress-text" class="text-xs font-semibold text-emerald-400 font-mono">0 završenih poslova</div>
+          <span class="text-[10px] text-zinc-400" id="active-zone-status">Sve sobe</span>
+        </div>
+      </div>
+
+      <!-- ROOM PROGRESS MATRIX (INTERACTIVE CARDS) -->
+      <div>
+        <div class="text-[11px] font-semibold text-zinc-400 mb-1.5 flex items-center justify-between">
+          <span>Napredak po sobama & zonama:</span>
+          <span class="text-[10px] text-zinc-500">Klikni sobu za filtriranje</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="room-matrix-container">
+          <!-- Injected dynamically with % and progress bars -->
+        </div>
+      </div>
+
+      <!-- Zone Filter Pills & Add Task Button -->
+      <div class="flex items-center justify-between gap-2 overflow-x-auto scrollbar-none pt-2 pb-1">
+        <div class="flex items-center space-x-1">
+          <button onclick="filterZone('all')" class="zone-pill px-2.5 py-1 rounded text-xs font-medium bg-zinc-800 text-zinc-100" data-zone="all">Sve</button>
+          <button onclick="filterZone('kupatilo')" class="zone-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-zone="kupatilo">Kupatilo</button>
+          <button onclick="filterZone('dnevno')" class="zone-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-zone="dnevno">Dnevno</button>
+          <button onclick="filterZone('sobe')" class="zone-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-zone="sobe">Sobe</button>
+          <button onclick="filterZone('dnevna')" class="zone-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-zone="dnevna">Dnevna</button>
+          <button onclick="filterZone('podovi')" class="zone-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-zone="podovi">Podovi</button>
+          <button onclick="filterZone('dubinsko')" class="zone-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-zone="dubinsko">Dubinsko</button>
+        </div>
+        <button onclick="toggleAddTaskModal()" class="text-xs font-medium text-zinc-300 hover:text-white px-2.5 py-1 rounded bg-surface-subtle border border-surface-border shrink-0">
+          + Novi zadatak
+        </button>
+      </div>
+
+      <!-- Add Task Modal Form -->
+      <form id="add-task-form" onsubmit="handleAddTask(event)" class="hidden p-3 rounded-lg bg-surface-card border border-surface-border space-y-2">
+        <div class="text-xs font-medium text-zinc-300">Dodaj novi zadatak:</div>
+        <div class="flex gap-2">
+          <input type="text" id="new-task-title" placeholder="Naziv zadatka (npr. Čišćenje stola)..." required class="flex-1 bg-surface-subtle border border-surface-border rounded px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500">
+          <select id="new-task-zone" class="bg-surface-subtle border border-surface-border rounded px-2 py-1.5 text-xs text-zinc-300">
+            <option value="kupatilo">Kupatilo</option>
+            <option value="dnevno">Dnevno</option>
+            <option value="sobe">Sobe</option>
+            <option value="dnevna">Dnevna</option>
+            <option value="podovi">Podovi</option>
+            <option value="dubinsko">Dubinsko</option>
+          </select>
+          <button type="submit" class="px-3 py-1.5 rounded bg-zinc-200 text-zinc-900 text-xs font-medium">Sačuvaj</button>
+        </div>
+      </form>
+
+      <!-- Tasks List -->
+      <div id="tasks-list" class="divide-y divide-surface-border border-y border-surface-border">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: NABAVKA ==================== -->
+    <section id="tab-shopping" class="space-y-3.5 hidden">
+
+      <!-- Notification Status & Quiet Hours Banner -->
+      <div id="shopping-notif-banner" class="p-2.5 rounded-lg border flex items-center justify-between text-xs bg-surface-card border-surface-border">
+        <div class="flex items-center space-x-2">
+          <span id="shop-banner-icon" class="text-base">⚡</span>
+          <span id="shop-banner-text" class="text-zinc-300"><b>Podsetnici:</b> Hitno na <b>30 min</b> · Standardno na <b>2 sata</b> (Pauza posle 22:00)</span>
+        </div>
+        <button onclick="toggleNotifications()" id="shop-banner-btn" class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-medium border border-zinc-700 transition-colors">
+          Pauziraj
+        </button>
+      </div>
+
+      <!-- Fast Input Form -->
+      <div class="p-3.5 rounded-lg bg-surface-card border border-surface-border space-y-2.5">
+        <form onsubmit="handleAddShopping(event)" class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="shop-title" placeholder="Šta treba kupiti? (npr. Omekšivač, Mleko, Cif...)" required
+                 class="flex-1 bg-surface-subtle border border-surface-border rounded px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 transition-colors">
+          <div class="flex gap-2">
+            <select id="shop-cat" class="bg-surface-subtle border border-surface-border rounded px-2.5 py-2 text-xs text-zinc-300 focus:outline-none">
+              <option value="hitno">🚨 Hitno / Bitno</option>
+              <option value="hemija">Hemija & Veš</option>
+              <option value="hrana">Hrana & Piće</option>
+              <option value="potrepstine">Pribor & Kuća</option>
+            </select>
+            <input type="text" id="shop-qty" placeholder="Kol." value="1"
+                   class="w-14 bg-surface-subtle border border-surface-border rounded px-2 py-2 text-xs text-center text-zinc-100 focus:outline-none">
+            <button type="submit" class="px-3.5 py-2 rounded bg-zinc-200 text-zinc-900 font-medium text-xs hover:bg-white transition-colors shrink-0">
+              Dodaj
+            </button>
+          </div>
+        </form>
+
+        <!-- Urgent Checkbox Option -->
+        <div class="flex items-center justify-between text-xs pt-0.5">
+          <label class="flex items-center space-x-2 cursor-pointer select-none">
+            <input type="checkbox" id="shop-is-urgent" class="check-custom">
+            <span class="text-xs text-amber-400 font-medium">🚨 Obeleži kao HITNO (Podsetnik na svakih 30 min do 22:00!)</span>
+          </label>
+        </div>
+
+        <!-- Quick 1-click Tags -->
+        <div class="pt-2 border-t border-surface-border flex flex-wrap gap-1 text-[11px]">
+          <span class="text-zinc-500 py-0.5 mr-1 font-medium">Brzi predlozi:</span>
+          <button onclick="quickAdd('Omekšivač za veš', 'hitno', '1 flaša', true)" class="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">⚡ Omekšivač (30 min)</button>
+          <button onclick="quickAdd('Tablete za sudove', 'hemija', '1 pak', false)" class="px-2 py-0.5 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-surface-border">Tablete sudovi</button>
+          <button onclick="quickAdd('Prašak za veš', 'hemija', '1 pak', false)" class="px-2 py-0.5 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-surface-border">Prašak za veš</button>
+          <button onclick="quickAdd('Mleko 1L', 'hrana', '2 kom', false)" class="px-2 py-0.5 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-surface-border">Mleko</button>
+          <button onclick="quickAdd('Jaja', 'hrana', '1 pak', false)" class="px-2 py-0.5 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-surface-border">Jaja</button>
+          <button onclick="quickAdd('WC Gel (Domestos)', 'hemija', '1 kom', false)" class="px-2 py-0.5 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-surface-border">WC Gel</button>
+          <button onclick="quickAdd('Toalet papir', 'potrepstine', '1 pak', false)" class="px-2 py-0.5 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-surface-border">Toalet papir</button>
+          <button onclick="quickAdd('Kese za smeće (60L)', 'potrepstine', '1 rolna', false)" class="px-2 py-0.5 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-surface-border">Kese za smeće</button>
+        </div>
+      </div>
+
+      <!-- Filters & Actions -->
+      <div class="flex items-center justify-between text-xs pt-1">
+        <div class="flex items-center space-x-1">
+          <button onclick="filterShoppingCategory('all')" class="shop-pill px-2.5 py-1 rounded text-xs font-medium bg-zinc-800 text-zinc-100" data-cat="all">Sve</button>
+          <button onclick="filterShoppingCategory('hitno')" class="shop-pill px-2.5 py-1 rounded text-xs font-medium text-amber-400 hover:text-amber-300" data-cat="hitno">🚨 Hitno (30m)</button>
+          <button onclick="filterShoppingCategory('hemija')" class="shop-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-cat="hemija">Hemija & Veš</button>
+          <button onclick="filterShoppingCategory('hrana')" class="shop-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-cat="hrana">Hrana</button>
+          <button onclick="filterShoppingCategory('potrepstine')" class="shop-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200" data-cat="potrepstine">Pribor</button>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="sendShoppingToTelegram()" class="px-2.5 py-1 rounded bg-surface-subtle hover:bg-zinc-800 text-zinc-300 border border-surface-border text-xs transition-colors">
+            Pošalji na Telegram
+          </button>
+          <button onclick="clearBoughtItems()" class="text-zinc-400 hover:text-zinc-200 text-xs px-2 py-1">
+            Očisti kupljeno
+          </button>
+        </div>
+      </div>
+
+      <!-- Unbought Items List -->
+      <div id="shopping-pending-list" class="divide-y divide-surface-border border-y border-surface-border">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Bought Items Accordion -->
+      <div class="pt-2">
+        <details class="group">
+          <summary class="cursor-pointer text-xs font-medium text-zinc-400 hover:text-zinc-300 list-none flex items-center justify-between py-1">
+            <span id="bought-count-label">Kupljene stavke (0)</span>
+            <span class="text-[10px] group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div id="shopping-bought-list" class="divide-y divide-surface-border opacity-50 mt-1">
+            <!-- Rendered dynamically -->
+          </div>
+        </details>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 3: TELEGRAM ==================== -->
+    <section id="tab-telegram" class="space-y-4 hidden">
+      <!-- Status Card -->
+      <div class="p-4 rounded-lg bg-surface-card border border-surface-border space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <span id="tg-status-indicator" class="w-2.5 h-2.5 rounded-full bg-zinc-600"></span>
+            <div>
+              <h2 class="text-xs font-semibold text-zinc-100">Telegram Privatni Čet</h2>
+              <p id="tg-status-text" class="text-[11px] text-zinc-400">Nije povezan</p>
+            </div>
+          </div>
+          <button onclick="testTelegram()" class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700 transition-colors">
+            Pošalji test poruku
+          </button>
+        </div>
+
+        <div id="tg-alert-box" class="hidden text-xs p-2.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono"></div>
+      </div>
+
+      <!-- Notification Control Card (Pause / Quiet Hours) -->
+      <div class="p-4 rounded-lg bg-surface-card border border-surface-border space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xs font-semibold text-zinc-200">Kontrola Notifikacija</h3>
+            <p id="tg-notif-desc" class="text-[11px] text-zinc-400 mt-0.5">Podsetnici su aktivni: 30 min (hitno) i 2 sata (standardno).</p>
+          </div>
+          <button id="tg-notif-toggle-btn" onclick="toggleNotifications()" class="px-3 py-1.5 rounded text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700">
+            Pauziraj sve
+          </button>
+        </div>
+
+        <!-- Quiet Hours explanation -->
+        <div class="p-2.5 rounded bg-surface-subtle border border-surface-border text-xs text-zinc-400 space-y-1">
+          <div class="font-medium text-zinc-200 flex items-center space-x-1.5">
+            <span>🌙</span> <span>Automatski noćni mir (Posle 22:00):</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            Pošto prodavnice ne rade noću, bot <b>automatski zaustavlja sve notifikacije za kupovinu od 22:00 do 08:30 ujutru</b>, tako da ti telefon neće zujati u toku večeri i noći!
+          </p>
+        </div>
+      </div>
+
+      <!-- Connection Form -->
+      <div class="p-4 rounded-lg bg-surface-card border border-surface-border space-y-3">
+        <h3 class="text-xs font-semibold text-zinc-200 uppercase tracking-wider">Podešavanje Tokena</h3>
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-zinc-400 mb-1 font-medium">Telegram Bot Token:</label>
+            <input type="text" id="tg-token-input" placeholder="Zalepi token od @BotFather-a..."
+                   class="w-full bg-surface-subtle border border-surface-border rounded px-3 py-2 text-xs text-zinc-100 font-mono focus:outline-none focus:border-zinc-500">
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button onclick="saveTelegramToken()" class="px-4 py-2 rounded bg-zinc-200 text-zinc-900 font-medium text-xs hover:bg-white transition-colors">
+              Sačuvaj Token
+            </button>
+            <span id="save-token-feedback" class="text-xs text-emerald-400 hidden">✓ Sačuvano!</span>
+          </div>
+
+          <div class="pt-2 border-t border-surface-border flex items-center justify-between">
+            <span class="text-zinc-400">Vreme jutarnjeg podsetnika:</span>
+            <input type="time" id="reminder-time-input" onchange="saveReminderTime()" value="09:00" class="bg-surface-subtle border border-surface-border rounded px-2.5 py-1 text-xs text-zinc-200 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <!-- Commands reference (Natural Speech & Slash) -->
+      <div class="p-4 rounded-lg bg-surface-card border border-surface-border text-xs space-y-2">
+        <h4 class="font-semibold text-zinc-200 flex items-center space-x-1.5">
+          <span>💬</span> <span>Prirodan razgovor sa botom (Nije potreban „/”):</span>
+        </h4>
+        <div class="space-y-1.5 text-zinc-400 text-[11px]">
+          <div>• <b>„kupi mleko i hleb”</b> — dodaje na spisak za kupovinu (podsetnik na <b>2 sata</b> do 22h)</div>
+          <div>• <b>„hitno nam treba omekšivač”</b> — stavlja u hitno (podsetnik na <b>30 min</b> do 22h)</div>
+          <div>• <b>„kupio sam omekšivač”</b> ili <b>„sve sam kupio”</b> — označava kupljeno i gasi podsetnik</div>
+          <div>• <b>„sredio sam kupatilo”</b> ili <b>„oprao sam sudove”</b> — označava poslove kao završene</div>
+          <div>• <b>„šta treba da se kupi?”</b> — prikazuje ti ceo spisak za kupovinu</div>
+          <div>• <b>„kako stojimo sa poslovima?”</b> — kompletan status po sobama u procentima</div>
+          <div>• <b>„pauziraj notifikacije”</b> / <b>„nastavi”</b> — gasi ili pali poruke</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: ISTORIJA ==================== -->
+    <section id="tab-activity" class="space-y-2 hidden">
+      <div class="flex items-center justify-between text-xs py-1 text-zinc-400">
+        <span>Zabeležene aktivnosti</span>
+        <span class="text-[11px] font-mono">Automatski sinhronizovano</span>
+      </div>
+      <div id="activity-log-list" class="divide-y divide-surface-border border-y border-surface-border">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: EDIT TASK -->
+  <div id="edit-task-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-surface-card border border-surface-border rounded-xl p-4 w-full max-w-sm space-y-3">
+      <h3 class="text-xs font-semibold text-zinc-200">Uredi zadatak</h3>
+      <input type="hidden" id="edit-task-id">
+      <div>
+        <label class="block text-[11px] text-zinc-400 mb-1">Naziv zadatka:</label>
+        <input type="text" id="edit-task-title" class="w-full bg-surface-subtle border border-surface-border rounded px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500">
+      </div>
+      <div>
+        <label class="block text-[11px] text-zinc-400 mb-1">Soba / Zona:</label>
+        <select id="edit-task-zone" class="w-full bg-surface-subtle border border-surface-border rounded px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none">
+          <option value="kupatilo">Kupatilo</option>
+          <option value="dnevno">Dnevno & Provere</option>
+          <option value="sobe">Sobe & Veš</option>
+          <option value="dnevna">Dnevna soba</option>
+          <option value="podovi">Podovi</option>
+          <option value="dubinsko">Dubinsko</option>
+        </select>
+      </div>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="closeEditTaskModal()" class="px-3 py-1.5 rounded text-xs text-zinc-400 hover:text-white">Odustani</button>
+        <button onclick="saveTaskEdit()" class="px-3.5 py-1.5 rounded bg-zinc-200 text-zinc-900 text-xs font-medium">Sačuvaj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION SCRIPT -->
+  <script>
+    let state = {
+      tasks: [],
+      shopping: [],
+      activity: [],
+      settings: {},
+      zone_stats: {},
+      in_quiet_hours: false,
+      public_url: '',
+      activeUser: localStorage.getItem('kh_user') || 'milos',
+      activeTab: 'tasks',
+      activeZone: 'all',
+      activeShoppingCategory: 'all',
+    };
+
+    const FOCUS_MAP = {
+      'Ponedeljak': '📋 Plan nedelje & velika nabavka',
+      'Utorak': '🚿 Kupatilo i sanitarije (kamenac, WC, slavine)',
+      'Sreda': '🛌 Spavaća soba & posteljina & veš mašina',
+      'Četvrtak': '🧹 Dnevna soba & prašina & radni stolovi',
+      'Petak': '🔌 Podovi: Usisavanje i pranje celog stana',
+      'Subota': '☕ Lagani odmor ili 1 dubinski zadatak',
+      'Nedelja': '✨ Slobodan dan za uživanje u čistom stanu'
+    };
+
+    const ZONE_LABELS = {
+      'kupatilo': { title: 'Kupatilo', icon: '🚿' },
+      'dnevno': { title: 'Dnevno & Provere', icon: '✨' },
+      'sobe': { title: 'Sobe & Veš', icon: '🛌' },
+      'dnevna': { title: 'Dnevna soba', icon: '🛋️' },
+      'podovi': { title: 'Podovi', icon: '🔌' },
+      'dubinsko': { title: 'Dubinsko', icon: '🔥' }
+    };
+
+    async function fetchState() {
+      try {
+        const res = await fetch('/api/state');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        state.tasks = data.tasks;
+        state.shopping = data.shopping;
+        state.activity = data.activity;
+        state.settings = data.settings;
+        state.zone_stats = data.zone_stats || {};
+        state.in_quiet_hours = data.in_quiet_hours || false;
+        state.public_url = data.public_url;
+
+        // Header info
+        document.getElementById('header-date').textContent = `${data.today_day_sr}, ${data.today_date}`;
+        document.getElementById('today-day-label').textContent = data.today_day_sr;
+        document.getElementById('today-focus-text').textContent = FOCUS_MAP[data.today_day_sr] || 'Održavanje stana';
+
+        // Public URL banner
+        document.getElementById('public-url-display').textContent = data.public_url;
+
+        // Render UI
+        renderNotificationPills();
+        renderRoomMatrix();
+        renderTasks();
+        renderShopping();
+        renderTelegramStatus();
+        renderActivity();
+
+      } catch (err) {
+        console.error('State sync error:', err);
+      }
+    }
+
+    // Toggle Notifications
+    async function toggleNotifications() {
+      try {
+        const res = await fetch('/api/settings/toggle_notifications', {method: 'POST'});
+        const data = await res.json();
+        if (data.ok) {
+          state.settings.notifications_enabled = data.notifications_enabled;
+          renderNotificationPills();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderNotificationPills() {
+      const isEnabled = state.settings.notifications_enabled !== '0';
+      const inQuiet = state.in_quiet_hours;
+
+      // Header button
+      const hBtn = document.getElementById('header-notif-btn');
+      const hIcon = document.getElementById('header-notif-icon');
+      const hText = document.getElementById('header-notif-text');
+
+      if (!isEnabled) {
+        hBtn.className = 'flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors bg-amber-500/10 border-amber-500/30 text-amber-400';
+        hIcon.textContent = '🔕';
+        hText.textContent = 'Pauzirano';
+      } else if (inQuiet) {
+        hBtn.className = 'flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors bg-surface-subtle border-surface-border text-zinc-400';
+        hIcon.textContent = '🌙';
+        hText.textContent = 'Noćni mir (do 08:30)';
+      } else {
+        hBtn.className = 'flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-colors bg-surface-subtle border-surface-border text-zinc-200 hover:text-white';
+        hIcon.textContent = '🔔';
+        hText.textContent = 'Do 22h';
+      }
+
+      // Shopping tab banner
+      const banner = document.getElementById('shopping-notif-banner');
+      const bIcon = document.getElementById('shop-banner-icon');
+      const bText = document.getElementById('shop-banner-text');
+      const bBtn = document.getElementById('shop-banner-btn');
+
+      if (!isEnabled) {
+        banner.className = 'p-2.5 rounded-lg border flex items-center justify-between text-xs bg-amber-500/10 border-amber-500/20 text-amber-300';
+        bIcon.textContent = '🔕';
+        bText.innerHTML = '<b>Notifikacije su trenutno pauzirane.</b> Bot ti ne šalje poruke na Telegram.';
+        bBtn.textContent = 'Aktiviraj';
+      } else if (inQuiet) {
+        banner.className = 'p-2.5 rounded-lg border flex items-center justify-between text-xs bg-zinc-900 border-zinc-800 text-zinc-400';
+        bIcon.textContent = '🌙';
+        bText.innerHTML = '<b>Noćni mir aktivan (posle 22:00):</b> Prodavnice ne rade, notifikacije su na pauzi do 08:30 ujutru.';
+        bBtn.textContent = 'Pauziraj trajno';
+      } else {
+        banner.className = 'p-2.5 rounded-lg border flex items-center justify-between text-xs bg-surface-card border-surface-border text-zinc-300';
+        bIcon.textContent = '⚡';
+        bText.innerHTML = '<b>Automatski podsetnici:</b> Hitno na <b>30 min</b> · Standardno na <b>2 sata</b> (Aktivno do 22:00)';
+        bBtn.textContent = 'Pauziraj';
+      }
+
+      // Telegram tab toggle card
+      const tgBtn = document.getElementById('tg-notif-toggle-btn');
+      const tgDesc = document.getElementById('tg-notif-desc');
+      if (tgBtn && tgDesc) {
+        if (!isEnabled) {
+          tgBtn.textContent = 'Uključi notifikacije';
+          tgBtn.className = 'px-3 py-1.5 rounded text-xs font-medium transition-colors bg-emerald-500 text-white shadow-sm';
+          tgDesc.textContent = '🔕 Notifikacije su trenutno pauzirane.';
+        } else {
+          tgBtn.textContent = 'Pauziraj notifikacije';
+          tgBtn.className = 'px-3 py-1.5 rounded text-xs font-medium transition-colors bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700';
+          tgDesc.textContent = inQuiet ? '🌙 Noćni mir je na snazi (posle 22h). Notifikacije miruju do jutra.' : '🔔 Podsetnici su aktivni: 30 min (hitno) i 2 sata (standardno) do 22:00.';
+        }
+      }
+    }
+
+    // Switch active user
+    function switchUser(userId) {
+      state.activeUser = userId;
+      localStorage.setItem('kh_user', userId);
+      updateUserButtonStyles();
+      renderTasks();
+    }
+
+    function updateUserButtonStyles() {
+      const isMilos = state.activeUser === 'milos';
+      const btnM = document.getElementById('user-btn-milos');
+      const btnS = document.getElementById('user-btn-sestra');
+      if (isMilos) {
+        btnM.className = 'px-3 py-1 rounded-md font-medium transition-all bg-zinc-800 text-zinc-100 shadow-sm';
+        btnS.className = 'px-3 py-1 rounded-md font-medium transition-all text-zinc-400 hover:text-zinc-200';
+      } else {
+        btnM.className = 'px-3 py-1 rounded-md font-medium transition-all text-zinc-400 hover:text-zinc-200';
+        btnS.className = 'px-3 py-1 rounded-md font-medium transition-all bg-zinc-800 text-zinc-100 shadow-sm';
+      }
+    }
+
+    // Tab switcher
+    function setActiveTab(tab) {
+      state.activeTab = tab;
+      ['tasks', 'shopping', 'telegram', 'activity'].forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          sec.classList.remove('hidden');
+          btn.className = 'px-4 py-2 text-xs font-semibold border-b-2 border-emerald-500 text-zinc-100 transition-all';
+        } else {
+          sec.classList.add('hidden');
+          btn.className = 'px-4 py-2 text-xs font-medium border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-all flex items-center space-x-1.5';
+        }
+      });
+    }
+
+    // Render Room Matrix Cards
+    function renderRoomMatrix() {
+      const container = document.getElementById('room-matrix-container');
+      const zones = ['kupatilo', 'dnevno', 'sobe', 'dnevna', 'podovi', 'dubinsko'];
+
+      const totalDone = state.tasks.filter(t => t.is_completed_today === 1).length;
+      document.getElementById('overall-progress-text').textContent = `${totalDone} završenih poslova danas`;
+
+      container.innerHTML = zones.map(z => {
+        const info = ZONE_LABELS[z] || { title: z, icon: '🧹' };
+        const stats = state.zone_stats[z] || { total: 0, completed: 0, pct: 0 };
+        const isFull = stats.pct === 100 && stats.total > 0;
+        const isCurrent = state.activeZone === z;
+
+        return `
+          <button onclick="filterZone('${z}')" class="p-2.5 rounded-lg border text-left transition-all ${isCurrent ? 'bg-zinc-800/80 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/20' : 'bg-surface-card border-surface-border hover:border-zinc-700'}">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-medium text-zinc-200 truncate">${info.icon} ${info.title}</span>
+              <span class="font-mono text-[11px] ${isFull ? 'text-emerald-400 font-bold' : 'text-zinc-400'}">${stats.pct}%</span>
+            </div>
+            <div class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300 ${isFull ? 'bg-emerald-500' : 'bg-zinc-600'}" style="width: ${stats.pct}%"></div>
+            </div>
+            <div class="text-[10px] text-zinc-500 mt-1 font-mono">${stats.completed} / ${stats.total} završeno</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Filter Tasks by Zone
+    function filterZone(zone) {
+      state.activeZone = zone;
+      document.querySelectorAll('.zone-pill').forEach(pill => {
+        if (pill.dataset.zone === zone) {
+          pill.className = 'zone-pill px-2.5 py-1 rounded text-xs font-medium bg-zinc-800 text-zinc-100';
+        } else {
+          pill.className = 'zone-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200';
+        }
+      });
+
+      const zoneInfo = ZONE_LABELS[zone];
+      document.getElementById('active-zone-status').textContent = zoneInfo ? `${zoneInfo.icon} ${zoneInfo.title}` : 'Sve sobe';
+      renderRoomMatrix();
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const list = document.getElementById('tasks-list');
+      let filtered = state.tasks;
+
+      if (state.activeZone !== 'all') {
+        filtered = filtered.filter(t => t.zone === state.activeZone);
+      }
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="py-6 text-center text-xs text-zinc-500">Nema zadataka u ovoj kategoriji.</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(t => {
+        const isDone = t.is_completed_today === 1;
+        const zoneBadge = ZONE_LABELS[t.zone] ? ZONE_LABELS[t.zone].title : t.zone;
+
+        let statusText = '';
+        if (isDone) {
+          if (t.recurrence === 'daily') {
+            statusText = `✓ ${t.completed_by || 'Urađeno'} · Resetuje se u ponoć`;
+          } else if (t.recurrence === 'weekly') {
+            statusText = `✓ ${t.completed_by || 'Urađeno'} (${t.last_completed_at || ''}) · Ostaje čisto do: ${t.room_day || 'sledeće nedelje'}`;
+          } else {
+            statusText = `✓ ${t.completed_by || 'Urađeno'} · Ostaje čisto do 1. u mesecu`;
+          }
+        } else {
+          statusText = t.recurrence === 'daily' ? 'Dnevna rutina (svaki dan)' : `Planirani fokus: ${t.room_day || 'Ove nedelje'}`;
+        }
+
+        return `
+          <div class="py-2.5 flex items-center justify-between group hover:bg-surface-subtle/50 px-1 -mx-1 rounded-md transition-colors" id="task-row-${t.id}">
+            <label class="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer pr-3">
+              <input type="checkbox" class="check-custom" ${isDone ? 'checked' : ''} onchange="optimisticToggleTask(${t.id})">
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-medium text-zinc-200 truncate ${isDone ? 'line-through text-zinc-500' : ''}">
+                  ${t.title}
+                </div>
+                <div class="flex items-center space-x-2 mt-0.5 text-[11px] text-zinc-500">
+                  <span class="font-mono text-[10px] text-zinc-400">${zoneBadge}</span>
+                  <span class="${isDone ? 'text-emerald-400 font-medium' : 'text-zinc-500'}">${statusText}</span>
+                </div>
+              </div>
+            </label>
+            <div class="flex items-center space-x-1 opacity-70 group-hover:opacity-100 transition-opacity">
+              <button onclick="openEditTaskModal(${t.id})" title="Izmeni zadatak" class="text-[11px] text-zinc-400 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-800">
+                ✏️
+              </button>
+              <button onclick="deleteTask(${t.id})" title="Obriši zadatak" class="text-[11px] text-zinc-500 hover:text-red-400 px-1.5 py-0.5 rounded hover:bg-zinc-800">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function optimisticToggleTask(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (task) {
+        task.is_completed_today = task.is_completed_today === 1 ? 0 : 1;
+        task.completed_by = task.is_completed_today === 1 ? (state.activeUser === 'milos' ? 'Miloš' : 'Sestra') : null;
+        
+        if (state.zone_stats[task.zone]) {
+          const delta = task.is_completed_today === 1 ? 1 : -1;
+          state.zone_stats[task.zone].completed += delta;
+          state.zone_stats[task.zone].pct = Math.round((state.zone_stats[task.zone].completed / state.zone_stats[task.zone].total) * 100);
+        }
+        renderRoomMatrix();
+        renderTasks();
+      }
+
+      const userName = state.activeUser === 'milos' ? 'Miloš' : 'Sestra';
+      await fetch('/api/tasks/toggle', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id, user_name: userName})
+      });
+      fetchState();
+    }
+
+    function openEditTaskModal(id) {
+      const task = state.tasks.find(t => t.id === id);
+      if (!task) return;
+      document.getElementById('edit-task-id').value = task.id;
+      document.getElementById('edit-task-title').value = task.title;
+      document.getElementById('edit-task-zone').value = task.zone;
+      document.getElementById('edit-task-modal').classList.remove('hidden');
+    }
+
+    function closeEditTaskModal() {
+      document.getElementById('edit-task-modal').classList.add('hidden');
+    }
+
+    async function saveTaskEdit() {
+      const id = document.getElementById('edit-task-id').value;
+      const title = document.getElementById('edit-task-title').value.trim();
+      const zone = document.getElementById('edit-task-zone').value;
+
+      if (!title) return;
+      await fetch('/api/tasks/edit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id, title, zone})
+      });
+
+      closeEditTaskModal();
+      fetchState();
+    }
+
+    async function deleteTask(id) {
+      if (!confirm('Sigurno želiš da obrišeš ovaj zadatak?')) return;
+      await fetch('/api/tasks/delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id})
+      });
+      fetchState();
+    }
+
+    function toggleAddTaskModal() {
+      const form = document.getElementById('add-task-form');
+      form.classList.toggle('hidden');
+    }
+
+    async function handleAddTask(e) {
+      e.preventDefault();
+      const title = document.getElementById('new-task-title').value.trim();
+      const zone = document.getElementById('new-task-zone').value;
+      const userName = state.activeUser === 'milos' ? 'Miloš' : 'Sestra';
+
+      await fetch('/api/tasks/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title, zone, recurrence: 'weekly', user_name: userName})
+      });
+
+      document.getElementById('new-task-title').value = '';
+      toggleAddTaskModal();
+      fetchState();
+    }
+
+    // ==================== SHOPPING ====================
+    function filterShoppingCategory(cat) {
+      state.activeShoppingCategory = cat;
+      document.querySelectorAll('.shop-pill').forEach(pill => {
+        if (pill.dataset.cat === cat) {
+          pill.className = 'shop-pill px-2.5 py-1 rounded text-xs font-medium bg-zinc-800 text-zinc-100';
+        } else {
+          pill.className = 'shop-pill px-2.5 py-1 rounded text-xs font-medium text-zinc-400 hover:text-zinc-200';
+        }
+      });
+      renderShopping();
+    }
+
+    function renderShopping() {
+      const pendingList = document.getElementById('shopping-pending-list');
+      const boughtList = document.getElementById('shopping-bought-list');
+
+      let pending = state.shopping.filter(s => s.is_bought === 0);
+      let bought = state.shopping.filter(s => s.is_bought === 1);
+
+      const urgentCount = pending.filter(s => s.is_urgent === 1 || s.category === 'hitno').length;
+      const urgBadge = document.getElementById('urgent-badge');
+      if (urgentCount > 0) {
+        urgBadge.textContent = `${urgentCount} hitno`;
+        urgBadge.classList.remove('hidden');
+      } else {
+        urgBadge.classList.add('hidden');
+      }
+
+      const badge = document.getElementById('shopping-badge');
+      if (pending.length > 0) {
+        badge.textContent = pending.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      if (state.activeShoppingCategory === 'hitno') {
+        pending = pending.filter(s => s.is_urgent === 1 || s.category === 'hitno');
+        bought = bought.filter(s => s.is_urgent === 1 || s.category === 'hitno');
+      } else if (state.activeShoppingCategory !== 'all') {
+        pending = pending.filter(s => s.category === state.activeShoppingCategory);
+        bought = bought.filter(s => s.category === state.activeShoppingCategory);
+      }
+
+      document.getElementById('bought-count-label').textContent = `Kupljene stavke (${bought.length})`;
+
+      if (pending.length === 0) {
+        pendingList.innerHTML = `<div class="py-6 text-center text-xs text-zinc-500">Sve je kupljeno. Nema aktivnih stavki.</div>`;
+      } else {
+        pendingList.innerHTML = pending.map(item => {
+          const isUrgent = item.is_urgent === 1 || item.category === 'hitno';
+          return `
+            <div class="py-2.5 flex items-center justify-between group ${isUrgent ? 'bg-amber-500/5 px-2 -mx-2 rounded-md border-l-2 border-amber-500' : ''}">
+              <label class="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer pr-3">
+                <input type="checkbox" class="check-custom" onchange="toggleShopping(${item.id})">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="text-xs font-medium text-zinc-100">${item.title}</span>
+                    <span class="text-[10px] text-zinc-500 font-mono">(${item.quantity})</span>
+                    ${isUrgent ? '<span class="text-[10px] text-amber-400 font-medium px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/20">⚡ 30m podsetnik</span>' : '<span class="text-[10px] text-zinc-500 font-mono">⏱️ 2h podsetnik</span>'}
+                  </div>
+                  <div class="text-[10px] text-zinc-500 font-mono mt-0.5">
+                    <span>${item.category}</span> · <span>Dodao/la: ${item.added_by || 'Miloš'}</span>
+                  </div>
+                </div>
+              </label>
+              <div class="flex items-center space-x-2 shrink-0">
+                <button onclick="toggleUrgent(${item.id})" title="Uključi/isključi podsetnik na svakih 30 min" class="text-[10px] px-1.5 py-0.5 rounded border ${isUrgent ? 'text-amber-400 border-amber-500/30 bg-amber-500/10 font-bold' : 'text-zinc-500 border-surface-border hover:text-zinc-300'}">
+                  ${isUrgent ? 'Hitno (30m)' : 'Standardno (2h)'}
+                </button>
+                <button onclick="deleteShopping(${item.id})" title="Obriši stavku" class="text-[11px] text-zinc-500 hover:text-red-400 opacity-60 group-hover:opacity-100">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      boughtList.innerHTML = bought.map(item => `
+        <div class="py-1.5 flex items-center justify-between text-xs text-zinc-500">
+          <div class="line-through truncate flex-1 pr-2">
+            ${item.title} (${item.quantity})
+          </div>
+          <button onclick="toggleShopping(${item.id})" class="text-[10px] text-zinc-400 hover:text-zinc-200 px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+            Vrati
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function handleAddShopping(e) {
+      e.preventDefault();
+      const title = document.getElementById('shop-title').value.trim();
+      const category = document.getElementById('shop-cat').value;
+      const quantity = document.getElementById('shop-qty').value || '1';
+      const isUrgent = document.getElementById('shop-is-urgent').checked || category === 'hitno';
+      const userName = state.activeUser === 'milos' ? 'Miloš' : 'Sestra';
+
+      await fetch('/api/shopping/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title, category, quantity, is_urgent: isUrgent, user_name: userName})
+      });
+
+      document.getElementById('shop-title').value = '';
+      document.getElementById('shop-is-urgent').checked = false;
+      fetchState();
+    }
+
+    async function quickAdd(title, category, quantity, isUrgent) {
+      const userName = state.activeUser === 'milos' ? 'Miloš' : 'Sestra';
+      await fetch('/api/shopping/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title, category, quantity, is_urgent: isUrgent, user_name: userName})
+      });
+      fetchState();
+    }
+
+    async function toggleShopping(id) {
+      const userName = state.activeUser === 'milos' ? 'Miloš' : 'Sestra';
+      await fetch('/api/shopping/toggle', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id, user_name: userName})
+      });
+      fetchState();
+    }
+
+    async function toggleUrgent(id) {
+      await fetch('/api/shopping/toggle_urgent', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id})
+      });
+      fetchState();
+    }
+
+    async function deleteShopping(id) {
+      await fetch('/api/shopping/delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id})
+      });
+      fetchState();
+    }
+
+    async function clearBoughtItems() {
+      if (!confirm('Obrisati kupljene stavke?')) return;
+      await fetch('/api/shopping/clear_bought', {method: 'POST'});
+      fetchState();
+    }
+
+    async function sendShoppingToTelegram() {
+      const res = await fetch('/api/telegram/send_summary', {method: 'POST'});
+      const data = await res.json();
+      if (data.ok) {
+        alert('Spisak je poslat na tvoj Telegram!');
+      } else {
+        alert('Greška: ' + (data.result || 'Proveri podešavanja bota'));
+      }
+    }
+
+    // ==================== TELEGRAM SETTINGS ====================
+    let tokenPopulated = false;
+    function renderTelegramStatus() {
+      const hasToken = !!state.settings.telegram_bot_token;
+      const chatId = state.settings.telegram_chat_id;
+      const userName = state.settings.telegram_user_name || 'Korisnik';
+
+      const dot = document.getElementById('tg-connected-dot');
+      const ind = document.getElementById('tg-status-indicator');
+      const txt = document.getElementById('tg-status-text');
+
+      if (!tokenPopulated && state.settings.telegram_bot_token) {
+        document.getElementById('tg-token-input').value = state.settings.telegram_bot_token;
+        tokenPopulated = true;
+      }
+      if (state.settings.reminder_time) {
+        document.getElementById('reminder-time-input').value = state.settings.reminder_time;
+      }
+
+      if (chatId) {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+        ind.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+        txt.innerHTML = `<span class="text-emerald-400 font-medium">Povezan privatni čet sa ${userName}</span> (Chat ID: ${chatId})`;
+      } else if (hasToken) {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse';
+        ind.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
+        txt.textContent = 'Token unet. Čeka se /start poruka u Telegramu...';
+      } else {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-zinc-600';
+        ind.className = 'w-2.5 h-2.5 rounded-full bg-zinc-600';
+        txt.textContent = 'Unesi Bot Token ispod da započneš povezivanje.';
+      }
+    }
+
+    async function saveTelegramToken() {
+      const token = document.getElementById('tg-token-input').value.trim();
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({telegram_bot_token: token})
+      });
+      const fb = document.getElementById('save-token-feedback');
+      fb.classList.remove('hidden');
+      setTimeout(() => fb.classList.add('hidden'), 3000);
+      fetchState();
+    }
+
+    async function saveReminderTime() {
+      const time = document.getElementById('reminder-time-input').value;
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({reminder_time: time})
+      });
+    }
+
+    async function testTelegram() {
+      const alertBox = document.getElementById('tg-alert-box');
+      alertBox.classList.remove('hidden');
+      alertBox.textContent = 'Slanje poruke...';
+
+      const res = await fetch('/api/telegram/test', {method: 'POST'});
+      const data = await res.json();
+      if (data.ok) {
+        alertBox.className = 'text-xs p-2.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono';
+        alertBox.textContent = '✓ Poruka je uspešno stigla na tvoj privatni Telegram čet!';
+      } else {
+        alertBox.className = 'text-xs p-2.5 rounded bg-red-950 text-red-300 border border-red-800 font-mono';
+        alertBox.textContent = 'Greška: ' + (data.result || 'Proveri token');
+      }
+    }
+
+    // ==================== ACTIVITY ====================
+    function renderActivity() {
+      const list = document.getElementById('activity-log-list');
+      if (state.activity.length === 0) {
+        list.innerHTML = `<div class="py-6 text-center text-xs text-zinc-500">Nema zabeleženih akcija.</div>`;
+        return;
+      }
+
+      list.innerHTML = state.activity.map(a => `
+        <div class="py-2 flex items-center justify-between text-xs">
+          <div class="text-zinc-200">
+            <span class="font-medium text-zinc-400 mr-1.5">[${a.user_name}]</span>
+            <span>${a.text}</span>
+          </div>
+          <span class="text-[10px] text-zinc-500 font-mono">${a.created_at}</span>
+        </div>
+      `).join('');
+    }
+
+    function copyPublicUrl() {
+      navigator.clipboard.writeText(state.public_url);
+      alert('Kopiran link za telefon:\n' + state.public_url);
+    }
+
+    // INIT
+    updateUserButtonStyles();
+    fetchState();
+    setInterval(fetchState, 3000);
+  </script>
+</body>
+</html>
