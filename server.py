@@ -234,14 +234,16 @@ def process_conversational_message(text, sender_name, chat_id):
         pub_url = get_public_url()
         reply = (
             f"👋 <b>Ćao {sender_name}!</b> Tu sam.\n\n"
-            f"Možeš mi pisati **potpuno prirodno**, ne moraš da kucaš '/'. Na primer:\n"
-            f"• <i>„kupi mleko i hleb”</i>\n"
-            f"• <i>„hitno nam treba omekšivač”</i> (podsetnik na 30 min)\n"
-            f"• <i>„kupio sam omekšivač”</i> (ili <i>„sve sam kupio”</i>)\n"
-            f"• <i>„sredio sam kupatilo”</i> (ili <i>„oprao sam sudove”</i>)\n"
-            f"• <i>„šta treba da se kupi?”</i>\n"
-            f"• <i>„kako stojimo sa poslovima?”</i>\n"
-            f"• <i>„pauziraj notifikacije”</i>\n\n"
+            f"Možeš mi pisati <b>potpuno prirodno</b>:\n"
+            f"• <i>„kupi mleko i hleb”</i> — dodaje na spisak\n"
+            f"• <i>„hitno nam treba omekšivač”</i> — alarm na 30 min\n"
+            f"• <i>„kupio sam mleko”</i> — briše sa spiska\n"
+            f"• <i>„sredio sam kupatilo”</i> / <i>„oprao sudove”</i> — beleži zadatke\n\n"
+            f"📋 <b>Glavne komande i prečice:</b>\n"
+            f"• <b>„status”</b> ili <b>„kako stojimo”</b> — stanje poslova i kupovine\n"
+            f"• <b>„šta treba da se kupi”</b> — ceo aktivni spisak\n"
+            f"• <b>„proveri”</b> — kućni inventar i provera frižidera\n"
+            f"• <b>„pauziraj”</b> / <b>„nastavi”</b> — gašenje/paljenje notifikacija\n\n"
             f"🔗 <b>Tvoj Dashboard:</b> {pub_url}"
         )
         send_telegram_message(reply, target_chat_id=chat_id)
