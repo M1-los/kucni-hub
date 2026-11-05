@@ -25,16 +25,8 @@ def get_db():
     return conn
 
 def get_public_url():
-    if os.path.exists(TUNNEL_LOG):
-        try:
-            with open(TUNNEL_LOG, "r") as f:
-                content = f.read()
-                matches = re.findall(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", content)
-                if matches:
-                    return matches[-1]
-        except Exception:
-            pass
-    return "http://192.168.0.11:8000"
+    return "https://kucni-hub.onrender.com"
+
 
 def is_in_quiet_hours(now):
     # From 22:00 (10 PM) until 08:30 AM (stores closed)
